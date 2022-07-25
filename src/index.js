@@ -1,17 +1,23 @@
-const express = require('express');
+const express = require("express");
+const route = require("./routes/route");
+const mongoose = require("mongoose");
 const app = express();
-const routes = require('./routes/routes')
-const mongoose = require('mongoose');
-const multer = require('multer');
-
-// app.use(multer().(function (req, file, cb) { if (file. mimetype == "image/png" || file. mimetype == "image/jpg" ) return true } ))
+const multer =  require('multer')
+app.use(multer().any())
 
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://avi-sin:CJTIF4CupXQdRKHV@cluster0.ovf3r.mongodb.net/group66Database')
-.then(() => console.log('MongoDb is connected...'), (err) => console.log(err))
-// .catch((err) => console.log(err));
+mongoose
+  .connect(
+    "mongodb+srv://santosh:Santosh24@cluster0.xy0vu.mongodb.net/groupDatabase66?retryWrites=true&w=majority",
+    { useNewUrlParser: true }
+  )
+  .then(() => {
+    console.log("database connected"), (error) => console.log(error);
+  });
 
-app.use(routes);
+app.use("/", route);
 
-app.listen(3000, () => console.log('Express app is running on port 3000'));
+app.listen(process.env.Port || 3000, () => {
+    console.log("Server running on Port " + (process.env.Port || 3000));
+  });

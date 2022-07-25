@@ -2,12 +2,37 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
 
-    fname: { type: String, required: true, trim: true },
-    lname: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, trim: true },
-    profileImage: { type: String, required: true }, // s3 link
-    phone: { type: String, required: true, unique: true, trim: true }, 
-    password: { type: String, required: true, trim: true }, // encrypted password
+    fname: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    lname: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    // profileImage: {
+    //     type: String,
+    //     required: true
+    // }, // s3 link
+    phone: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true,
+        trim: true
+    }, // encrypted password
     address: {
         shipping: {
             street: { type: String, required: true, trim: true },
@@ -21,6 +46,6 @@ const userSchema = new mongoose.Schema({
         }
     }
 
-}, { timestamps: true } );
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema)
