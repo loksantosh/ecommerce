@@ -13,7 +13,7 @@ mongoose
     { useNewUrlParser: true }
   )
   .then(() => {
-    console.log("database connected"), (error) => console.log(error);
+    console.log("Database connected"), (error) => console.log(error);
   });
 
 app.use("/", route);
