@@ -37,11 +37,12 @@ const aws1 = async function(req, res, next){
         if(files && files.length>0){
 
             let uploadedFileURL= await uploadFile( files[0] )
-             req.bookCover =  uploadedFileURL
+             req.profileImage =  uploadedFileURL
+             
              next()
         }
         else{
-            res.status(400).send({ msg: "No file found" })
+            res.status(400).send({ msg: "provide profileImage" })
         }
         
     }
