@@ -3,6 +3,8 @@ const validator = require("email-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const aws = require('../aws/aws');
+
 
 // 1. API ================================================ CREATE USER ============================================================================
 
@@ -49,12 +51,15 @@ const createUser = async function (req, res) {
     let files = req.files;
 
     if (!files) {
-      return res.status(400).send({ status: false, msg: "Please enter  profileImage" });
+      return res.status(400).send({ status: false, msg: "Please enter profileImage" });
     }
 
 
     //aws
-    req.body.profileImage = req.profileImage;
+    // let uploadedImage = await aws.uploadFile(profileImage);
+    //   req.body.profileImage = uploadedImage
+    req.body.profileImage = req.profileImage
+
 
     //phone
     if (!phone) {
@@ -193,6 +198,7 @@ const loginUser = async function (req, res) {
       { expiresIn: "3600s" }
     );
 
+
     let id = user._id;
     return res.status(200).send({status: true,messege: "User login successfull",data: { id, token },
     });
@@ -225,10 +231,10 @@ const getUser = async function (req, res) {
   }
 };
 
-// 4. API ============================================================ UPDATE USER ====================================================================================
+// 4. API ====================================================== UPDATE USER BY ID ====================================================================================
 
 const updateUser = async (req, res) => {
-  //   try {
+     try {
   let userId = req.params.userId;
 
   if (!mongoose.isValidObjectId(userId))
@@ -293,10 +299,12 @@ const updateUser = async (req, res) => {
     const hashedPass = await bcrypt.hash(password, salt);
     req.body.password = hashedPass;
   }
-
-  profileImage = req.profileImage;
-
-    //--------------------------------------------------------------- SHIPPING ADDRESS IN UPDATE ------------------------------------------------------------
+     
+  if(profileImage){
+  let uploadedImage = await aws.uploadFile(profileImage);
+      req.body.profileImage = uploadedImage
+  }
+    //----------------------------------------------------------- SHIPPING ADDRESS IN UPDATE ------------------------------------------------------------
 
   if (address) {
     address = JSON.parse(req.body.address);
@@ -332,7 +340,7 @@ const updateUser = async (req, res) => {
 
     }
 
-    //--------------------------------------------------------------- BILLING ADDRESS IN UPDATE ------------------------------------------------------------
+    //---------------------------------------------------------- BILLING ADDRESS IN UPDATE ------------------------------------------------------------
     //street
     if (address.billing) {
       const billing = address.billing;
@@ -373,7 +381,7 @@ const updateUser = async (req, res) => {
         fname: fname,
         lname: lname,
         email: email,
-        profileImage: profileImage,
+        profileImage:req.body,
         phone: phone,
         password: password,
         address: address
@@ -384,9 +392,9 @@ const updateUser = async (req, res) => {
   );
 
   res.status(200).send({ status: true, messege: "User profile updated", data: updateUser });
-  //   } catch (err) {
-  //     res.status(500).send({ status: false, message: err.message });
-  //   }
+    } catch (err) {
+      res.status(500).send({ status: false, message: err.message });
+    }
 };
 
 module.exports = { createUser, loginUser, getUser, updateUser };

@@ -1,14 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
-const aws = require('../aws/aws');
 
-//================= USER API'S ===================================================
+const {createUser,loginUser,getUser,updateUser} = require('../controllers/userController');
+const{createProduct,getProductbyId,deleteProduct} = require('../controllers/productController')
+const{authorization,authentication}= require('../middleware/auth')
+const {aws1} = require('../aws/aws')
 
-router.post('/register',aws.aws1, userController.createUser)
-router.post('/login', userController.loginUser)
-router.get('/user/:userId/profile', userController.getUser)
-router.put('/user/:userId/profile',aws.aws1, userController.updateUser)
+//================= USER API'S ==================================================
+
+router.post('/register',aws1,createUser)
+router.post('/login', loginUser)
+router.get('/user/:userId/profile',authentication,getUser)
+router.put('/user/:userId/profile', updateUser)
+
+//================= PRODUCT API'S ===================================================
+router.post('/products',aws1, createProduct)
+ router.get("/products/:productId" , getProductbyId)
+ router.delete("/products/:productId" ,deleteProduct )
+
+
 
 
 //================= BAD URL VALIDATION ============================================
