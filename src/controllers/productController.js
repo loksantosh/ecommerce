@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const productModel = require('../models/productModel')
 const uploadFile = require('../aws/aws')
 
-// 5. API ====================================================== CREATE PRODUCT =================================================================
+// 5. API ====================================================== CREATE PRODUCT ==========================================================
 
 const createProduct = async function (req, res) {
 
@@ -17,9 +17,6 @@ const createProduct = async function (req, res) {
         return res.status(400).send({ status: false, msg: "Please enter title" });
     }
 
-    if (!/^\w[a-zA-Z.\s_]*$/.test(title))
-        return res.status(400).send({ status: false, msg: "The  title may contain only letters" });
-
     let uniqueTitle = await productModel.findOne({ title });
     if (uniqueTitle) {
         return res.status(400).send({ status: false, msg: "This title already exists" });
@@ -27,12 +24,10 @@ const createProduct = async function (req, res) {
 
 
     //description
-    if (!description) {
+    if (!description)
         return res.status(400).send({ status: false, msg: "Please enter description" });
-    }
 
-    // if (!/^\w[a-zA-Z.\s_]*$/.test(description))
-    //return res.status(400).send({ status: false, msg: "The  description may contain only letters" });
+
 
     //price
     if (!price)
@@ -40,9 +35,9 @@ const createProduct = async function (req, res) {
 
 
     //currencyId
-    if (!currencyId) {
+    if (!currencyId)
         return res.status(400).send({ status: false, msg: "currencyId is missing" });
-    }
+
 
     //currencyFormat
     if (!currencyFormat) {
@@ -57,33 +52,82 @@ const createProduct = async function (req, res) {
     if (!files) {
         return res.status(400).send({ status: false, msg: "Please enter productImage" });
     }
-    //aws
 
-    req.body.productImage = req.profileImage
-    // if (files && files.length > 0) {
-    //    let awsUrl = await uploadFile(files[0]);
-    //     data['productImage'] = awsUrl
-    // }
+    req.body.productImage = await uploadFile.uploadFile(files[0])
 
     //availableSizes
+    if (availableSizes) {
+        let s = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        const availSizes = availableSizes.split(',').map(s => s.trim().toUpperCase())
 
-    let s = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-    const availSizes = availableSizes.split(',').map(s => s.trim().toUpperCase())
-
-    for (let i = 0; i < availSizes.length; i++) {
-        console.log(availSizes[i])
-        if (!s.includes(availSizes[i]))
-            return (res.status(400).send({ status: false, msg: "provide only S, XS, M, X, L, XXL, XL" }))
+        for (let i = 0; i < availSizes.length; i++) {
+            console.log(availSizes[i])
+            if (!s.includes(availSizes[i]))
+                return (res.status(400).send({ status: false, msg: "provide only S, XS, M, X, L, XXL, XL" }))
+        }
+        req.body.availableSizes = availSizes
     }
 
-    req.body.availableSizes = availSizes
+
     const createProduct = await productModel.create(req.body)
     res.status(201).send({ status: true, message: " product created successfully", data: createProduct })
 
 }
 // 6. API ====================================================== GET PRODUCT =================================================================
+const getProducts = async function (req, res) {
 
-// 7. API ====================================================== GET PRODUCT BY ID =================================================================
+    try {
+
+        let data = req.query
+        let priceGreaterThan = req.query.priceGreaterThan
+        let priceLessThan = req.query.priceLessThan
+
+        if (data) {
+
+            if (priceGreaterThan && priceLessThan) {
+                const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan, $lt: priceLessThan } })
+                if (filter.length == 0) return res.status(404).send({ status: false, messege: "no products found" })
+                return res.status(200).send({ status: true, messege: 'products list', data: filter })
+            }
+
+            if (priceGreaterThan) {
+                const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan } })
+                if (filter.length == 0) return res.status(404).send({ status: false, messege: "no products found" })
+                return res.status(200).send({ status: true, messege: 'products list', data: filter })
+            }
+
+            if (priceLessThan) {
+                const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $lt: priceLessThan } })
+                if (filter.length == 0) return res.status(404).send({ status: false, messege: "no products found" })
+                return res.status(200).send({ status: true, messege: 'products list', data: filter })
+            }
+
+
+            if (data.availableSizes)
+                data.availableSizes = data.availableSizes.split(',').map(s => s.trim().toUpperCase())
+
+            const productDetails = await productModel.find({ $and: [data, { isDeleted: false }] }).sort({ price: 1 })
+
+            if (productDetails.length == 0) return res.status(404).send({ status: false, messege: "No product found" })
+
+            return res.status(200).send({ status: true, messege: 'Products list', data: productDetails })
+
+        }
+        else {
+            const productDetails = await productModel.find({ isDeleted: false }).sort({ price: 1 })
+            return res.status(200).send({ status: true, messege: 'Products list', data: productDetails })
+        }
+
+    }
+    catch (err) {
+        res.status(500).send({ status: false, message: err.message })
+    }
+}
+
+
+
+
+// 7. API ====================================================== GET PRODUCT BY ID ========================================================
 const getProductbyId = async function (req, res) {
     try {
         let productId = req.params.productId;
@@ -135,4 +179,4 @@ const deleteProduct = async function (req, res) {
 
 
 
-module.exports = { createProduct, getProductbyId, deleteProduct };
+module.exports = { createProduct, getProductbyId, deleteProduct, getProducts };
