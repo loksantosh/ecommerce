@@ -205,6 +205,7 @@ const loginUser = async function (req, res) {
   }
 };
 
+
 // 3. API ====================================================== GET USER BYID================================================================================
 
 const getUser = async function (req, res) {

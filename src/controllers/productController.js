@@ -138,7 +138,7 @@ const getProductbyId = async function (req, res) {
             }
         }
 
-        let productDetail = await productModel.findById(productId);
+        const productDetail = await productModel.findById(productId);
 
         if (!productDetail)
             return res.status(404).send({ status: false, messege: "product not found!" });
