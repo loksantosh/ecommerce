@@ -246,24 +246,27 @@ const updateUser = async (req, res) => {
       return res.status(404).send({ status: false, messege: "no data found " });
 
     const data = req.body;
+    
+    if (Object.keys(data).length == 0  ) {
+      return res.status(400).send({
+        status: false,
+        msg: "Please enter request data to be created",
+      });
+    }
+    
 
     let { fname, lname, email, phone, password, profileimage, address } = data;
-    // if(data){
-    // if (Object.keys(data).length == 0  ) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     msg: "Please enter request data to be created",
-    //   });
-    // }
-    // }
-
+    
+ let obj={}
     if (fname) {
       if (!/^\w[a-zA-Z.\s_]*$/.test(fname))
         return res.status(400).send({ status: false, msg: "The  fname may contain only letters" });
+        obj.fname=fname
     }
     if (lname) {
       if (!/^\w[a-zA-Z.\s_]*$/.test(lname))
         return res.status(400).send({ status: false, msg: "The  fname may contain only letters" });
+        obj.lname=lname
     }
     if (email) {
       let checkEmail = validator.validate(email);
@@ -274,6 +277,7 @@ const updateUser = async (req, res) => {
       if (uniqueEmail) {
         return res.status(400).send({ status: false, msg: "This email already exists" });
       }
+      obj.email=email
     }
 
     if (phone) {
@@ -287,6 +291,7 @@ const updateUser = async (req, res) => {
       if (uniquephone) {
         return res.status(400).send({ status: false, msg: "This phone number already exists" });
       }
+      obj.phone=phone
     }
     if (password) {
       if (
@@ -299,7 +304,8 @@ const updateUser = async (req, res) => {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPass = await bcrypt.hash(password, salt);
-      req.body.password = hashedPass;
+      // req.body.password = hashedPass;
+      obj.password=hashedPass
     }
     let files = req.files;
     if (files.length > 0) {
@@ -309,12 +315,15 @@ const updateUser = async (req, res) => {
         return res.status(400).send({ status: false, msg: "Please enter profileimage" });
       }
       profileimage = await uploadFile.uploadFile(files[0])
+      obj.profileImage=profileimage
     }
     //----------------------------------------------------------- SHIPPING ADDRESS IN UPDATE ------------------------------------------------------------
-    let shipping, billing
+    
 
     if (address) {
+      obj.address={}
       address = JSON.parse(req.body.address);
+      
       if (address.shipping) {
 
         shipping = address.shipping;
@@ -346,11 +355,18 @@ const updateUser = async (req, res) => {
         if (!/^\d{6}$/.test(shipping.pincode))
           return res.status(400).send({ status: false, msg: "Please enter valid Pincode" });
 
+          obj.address.shipping=address.shipping
+
+      }
+      else{
+        obj.address.shipping=user.address.shipping
       }
 
       //---------------------------------------------------------- BILLING ADDRESS IN UPDATE ------------------------------------------------------------
       //street
 
+     
+      
       if (address.billing) {
         billing = address.billing;
 
@@ -378,23 +394,19 @@ const updateUser = async (req, res) => {
           return res.status(400).send({ status: false, msg: " Please enter pincode as a number" });
         if (!/^\d{6}$/.test(address.billing.pincode))
           return res.status(400).send({ status: false, msg: "Please enter valid Pincode" });
+
+          obj.address.billing=address.billing
       }
-
-      req.body.address = address;
+      else{
+       obj.address.billing=user.address.billing
+     }
+     // req.body.address = address;
     }
-
+ 
     const updateUser = await userModel.findByIdAndUpdate(
       userId,
       {
-        $set: {
-          fname: fname,
-          lname: lname,
-          email: email,
-          profileImage: profileimage,
-          phone: phone,
-          password: password,
-          address: { $set: { shipping: shipping, billing: billing } }
-        }
+        $set: obj
       },
       { new: true }
     );
