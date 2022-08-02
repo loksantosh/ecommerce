@@ -4,14 +4,15 @@ const router = express.Router();
 const { createUser, loginUser, getUser, updateUser } = require('../controllers/userController');
 const { createProduct, getProductbyId, deleteProduct, getProducts } = require('../controllers/productController')
 const { authorization, authentication } = require('../middleware/auth')
-const {Cart,updateCart,getCart,deleteCart} = require('../controllers/cartControllers')
+const { createCart, updateCart, getCart, deleteCart } = require('../controllers/cartControllers')
+const { createOrder, updateOrder } = require('../controllers/orderController')
 
 
 //==== FEATURE-I ======= USER API'S ========================================================
 router.post('/register', createUser)
 router.post('/login', loginUser)
 router.get('/user/:userId/profile', authentication, getUser)
-router.put('/user/:userId/profile', updateUser)     // THIS API ADDRESS NOT UPDATED
+router.put('/user/:userId/profile', updateUser)
 
 
 //==== FEATURE-II ====== PRODUCT API'S======================================================
@@ -22,10 +23,15 @@ router.delete("/products/:productId", deleteProduct)
 
 
 //==== FEATURE-III ====== CART API'S ========================================================
-router.post('/users/:userId/cart',Cart)
-router.put('/users/:userId/cart',updateCart)
-router.get('/users/:userId/cart',getCart)
-router.delete('/users/:userId/cart',deleteCart)
+router.post('/users/:userId/cart', createCart)
+router.put('/users/:userId/cart', updateCart)
+router.get('/users/:userId/cart', getCart)
+router.delete('/users/:userId/cart', deleteCart)
+
+
+//==== FEATURE-IV ====== ORDER API'S ========================================================
+router.post('users/:userId/orders', createOrder)
+router.put('/users/:userId/orders', updateOrder)
 
 
 

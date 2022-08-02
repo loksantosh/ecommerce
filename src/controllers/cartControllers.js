@@ -3,9 +3,9 @@ const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const productModel = require('../models/productModel')
 
-// 9. API ==================================== CREATE CART ==========================================================
+// 9. API ==================================== CREATE CART BY USER ID ==========================================================
 
-const Cart = async function (req, res) {
+const createCart = async function (req, res) {
     try {
 
 
@@ -81,7 +81,7 @@ const Cart = async function (req, res) {
 
 
         }
-   }
+    }
     catch (error) {
         return res.status(500).json({ status: 500, msg: error.message })
     }
@@ -103,14 +103,10 @@ const updateCart = async function (req, res) {
         let userId = req.params.userId;
 
         if (!mongoose.isValidObjectId(userId))
-            return res
-                .status(400)
-                .send({ status: false, messege: "enter valid objectID" });
+            return res.status(400).send({ status: false, messege: "enter valid objectID" });
 
         if (!userId)
-            return res
-                .status(400)
-                .send({ status: false, messege: "userId is required" });
+            return res.status(400).send({ status: false, messege: "userId is required" });
 
         const findUserId = await userModel.findById(userId);
         if (!findUserId)
@@ -231,4 +227,4 @@ const deleteCart = async function (req, res) {
 
 
 
-module.exports = { Cart, getCart, deleteCart, updateCart }
+module.exports = { createCart, getCart, deleteCart, updateCart }

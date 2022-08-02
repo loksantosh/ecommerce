@@ -3,6 +3,8 @@ const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const productModel = require('../models/productModel')
 
+// 13. API ==================================== CREATE ORDER BY USER ID ==========================================================
+
 
 const createOrder = async function (req, res) {
     try {
@@ -24,23 +26,23 @@ const createOrder = async function (req, res) {
         if (!findUserId)
             return res.status(404).send({ status: false, messege: "user doesn't exist" });
 
-        const {cartId}=data
+        const { cartId } = data
 
         if (!mongoose.isValidObjectId(cartId)) {
             return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId", });
         }
-        
-        const findCart = await cartModel.findOne({ cartId:cartId }).select({ _id: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+
+        const findCart = await cartModel.findOne({ cartId: cartId }).select({ _id: 0, createdAt: 0, updatedAt: 0, __v: 0 })
         if (!cart)
             return res.status(404).send({ status: false, messege: "cart doesn't exist" });
-           
-            if (findCart.items.length === 0) {
-                return res.status(400).send({ status: false, message: "Your cart is empty" })
-            }
-        
+
+        if (findCart.items.length === 0) {
+            return res.status(400).send({ status: false, message: "Your cart is empty" })
+        }
 
 
-        
+
+
 
         if (!findCart || findCart.items.length == 0) {
             let newCart = {
@@ -79,3 +81,14 @@ const createOrder = async function (req, res) {
         return res.status(500).json({ status: 500, msg: error.message })
     }
 }
+
+
+// 14. API ==================================== UPDATE ORDER BY USER ID ==========================================================
+
+const updateOrder = async function (req, res) {
+
+}
+
+
+
+module.exports = { createOrder, updateOrder }
