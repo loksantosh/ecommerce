@@ -49,7 +49,7 @@ const Cart = async function (req, res) {
 
         const findCart = await cartModel.findOne({ userId: userId })
 
-        if (!findCart || findCart.items.length == 0) {
+        if (!findCart || (!findCart && findCart.items.length == 0)) {
             let newCart = {
                 userId: userId,
                 items: { productId },
@@ -81,7 +81,7 @@ const Cart = async function (req, res) {
 
 
         }
-    }
+   }
     catch (error) {
         return res.status(500).json({ status: 500, msg: error.message })
     }
