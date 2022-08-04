@@ -55,7 +55,6 @@ const createProduct = async function (req, res) {
     const availSizes = availableSizes.split(",").map((s) => s.trim().toUpperCase());
 
     for (let i = 0; i < availSizes.length; i++) {
-      console.log(availSizes[i]);
       if (!s.includes(availSizes[i]))
         return res.status(400).send({ status: false, msg: "provide only S, XS, M, X, L, XXL, XL" });
     }
@@ -135,8 +134,12 @@ const getProductbyId = async function (req, res) {
     res.status(500).send({ status: false, message: err.message });
   }
 };
+// 8. API ====================================================== UPDATE PRODUCT BY ID ========================================================
+const updateProduct = async function(req,res){
 
-// 8. API ==================================== DELETE PRODUCT BY ID ==========================================================
+}
+
+// 9. API ==================================== DELETE PRODUCT BY ID ==========================================================
 
 const deleteProduct = async function (req, res) {
   try {
@@ -163,4 +166,4 @@ const deleteProduct = async function (req, res) {
   }
 };
 
-module.exports = { createProduct, getProductbyId, deleteProduct, getProducts };
+module.exports = { createProduct, getProductbyId,updateProduct, deleteProduct, getProducts };

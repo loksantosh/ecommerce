@@ -57,7 +57,7 @@ const createCart = async function (req, res) {
                 totalItems: 1
             }
 
-            const createCart = await cartModel.create(newCart)
+            const createCart = await (await cartModel.create(newCart)).populate('items',{_id:1 ,title:1,price:1,productImage:1})
             return res.status(201).send(createCart)
 
         }
@@ -71,11 +71,13 @@ const createCart = async function (req, res) {
                     itemsPresent[i].quantity++
                     findCart.totalPrice = Product.price + findCart.totalPrice
                     const sameProduct = await findCart.save()
+                    await sameProduct.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
                     return res.json(sameProduct)
                 }
             }
 
             const updateCart = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { totalPrice: Product.price + findCart.totalPrice, totalItems: findCart.items.length + 1 }, $push: { items: { productId } } }, { new: true })
+            await updateCart.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
             return res.status(201).send(updateCart)
 
 

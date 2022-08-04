@@ -127,7 +127,7 @@ const createUser = async function (req, res) {
       return res.status(400).send({ status: false, msg: "street is missing" });
     }
     if (typeof billing.street != "string" || billing.street.trim().length == 0)
-      return res.status(400).send({ status: false, msg: " Please enter  street as a String" });
+      return res.status(400).send({ status: false, msg: " Please enter street as a String" });
 
     //city
     if (!billing.city) {
@@ -281,10 +281,8 @@ const updateUser = async (req, res) => {
       if (typeof phone !== "string")
         return res.status(400).send({ status: false, msg: " Please enter  phone as a String" });
 
-      if (!/^(\+\d{1,3}[- ]?)?\d{10}$/.test(phone))
-        return res.status(400).send({
-          status: false, msg: "Please enter a valid Indian phone number",
-        });
+      if (!/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone))
+        return res.status(400).send({status: false, msg: "Please enter a valid Indian phone number",});
 
       let uniquephone = await userModel.findOne({ phone: phone });
       if (uniquephone) {
@@ -299,7 +297,7 @@ const updateUser = async (req, res) => {
           password
         )
       )
-        return res.status(400).send({status: false,msg: "password must be 8-15 charecter long with a number special charecter and should have both upper and lowercase alphabet",});
+        return res.status(400).send({ status: false, msg: "password must be 8-15 charecter long with a number special charecter and should have both upper and lowercase alphabet", });
 
       let validPassword = await bcrypt.compare(password, user.password);
       if (validPassword)
