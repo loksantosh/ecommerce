@@ -65,6 +65,7 @@ const createProduct = async function (req, res) {
   res.status(201).send({ status: true, message: " product created successfully", data: createProduct });
 };
 // 6. API ====================================================== GET PRODUCT =================================================================
+
 const getProducts = async function (req, res) {
   try {
     let data = req.query;
@@ -124,7 +125,7 @@ const getProductbyId = async function (req, res) {
       }
     }
 
-    const productDetail = await productModel.findById(productId);
+    const productDetail = await productModel.findById({ productId, isDeleted: false });
 
     if (!productDetail)
       return res.status(404).send({ status: false, messege: "product not found!" });
@@ -135,9 +136,82 @@ const getProductbyId = async function (req, res) {
   }
 };
 // 8. API ====================================================== UPDATE PRODUCT BY ID ========================================================
-const updateProduct = async function(req,res){
+const updateProduct = async function (req, res) {
+
+  try {
+
+
+
+    let productId = req.params.productId;
+
+    if (productId) {
+      if (!mongoose.isValidObjectId(productId)) {
+        return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId" });
+      }
+    }
+
+    const { title, description, price, currencyId, currencyFormat, productImage, availableSizes, } = req.body;
+
+    if (Object.keys(req.body).length == 0) {
+      return res.status(400).send({ status: false, msg: "Please enter request data to be created" });
+    }
+    let obj = {}
+    //title
+    if (title) {
+      let uniqueTitle = await productModel.findOne({ title });
+      if (uniqueTitle)
+        return res.status(400).send({ status: false, msg: "This title already exists" });
+
+      obj.title = title
+
+    }
+    //description
+    if (description) {
+      obj.description = description
+    }
+    //price
+    if (price) {
+      obj.price = price
+    }
+    //currencyId
+    if (currencyId) {
+      obj.currencyId = currencyId
+    }
+    //currencyFormat
+    if (currencyFormat) {
+      return res.status(400).send({ status: false, msg: "The  currencyFormat is not valid" });
+      obj.currencyFormat = currencyFormat
+    }
+    //productImage
+    let files = req.files;
+    if (files) {
+      obj.productImage = await uploadFile.uploadFile(files[0]);
+    }
+
+    //availableSizes
+    if (availableSizes) {
+      let s = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+      const availSizes = availableSizes.split(",").map((s) => s.trim().toUpperCase());
+
+      for (let i = 0; i < availSizes.length; i++) {
+        if (!s.includes(availSizes[i]))
+          return res.status(400).send({ status: false, msg: "provide only S, XS, M, X, L, XXL, XL" });
+      }
+      obj.availableSizes = availSizes
+    }
+
+   const  updateProduct = await productModel.findByIdAndUpdate({ productId, isDeleted: false }, { $set: obj }, { new: true })
+    if (!updateProduct)
+      return res.status(404).send({ status: false, messege: "no data found" });
+    return res.status(200).send({ status: true, message: "Success", data: updateProduct });
+
+  } catch (error) {
+
+    return res.status(500).send({ status: false, message: error.message })
+  }
 
 }
+
 
 // 9. API ==================================== DELETE PRODUCT BY ID ==========================================================
 
@@ -166,4 +240,4 @@ const deleteProduct = async function (req, res) {
   }
 };
 
-module.exports = { createProduct, getProductbyId,updateProduct, deleteProduct, getProducts };
+module.exports = { createProduct, getProductbyId, updateProduct, deleteProduct, getProducts };
