@@ -125,7 +125,7 @@ const getProductbyId = async function (req, res) {
       }
     }
 
-    const productDetail = await productModel.findById({ productId, isDeleted: false });
+    const productDetail = await productModel.findOne({ _id:productId, isDeleted: false });
 
     if (!productDetail)
       return res.status(404).send({ status: false, messege: "product not found!" });
@@ -140,8 +140,6 @@ const updateProduct = async function (req, res) {
 
   try {
 
-
-
     let productId = req.params.productId;
 
     if (productId) {
@@ -152,43 +150,46 @@ const updateProduct = async function (req, res) {
 
     const { title, description, price, currencyId, currencyFormat, productImage, availableSizes, } = req.body;
 
-    if (Object.keys(req.body).length == 0) {
+    if (Object.keys(req.body).length == 0 && !req.files) {
       return res.status(400).send({ status: false, msg: "Please enter request data to be created" });
     }
-    let obj = {}
+    
+    const findProduct=await productModel.findOne({_id:productId,isDeleted:false})
+    if(!findProduct) return res.status(404).send({ status: false, msg: "no data found" });
     //title
     if (title) {
       let uniqueTitle = await productModel.findOne({ title });
       if (uniqueTitle)
         return res.status(400).send({ status: false, msg: "This title already exists" });
 
-      obj.title = title
+        findProduct.title = title
 
     }
     //description
     if (description) {
-      obj.description = description
+      findProduct.description = description
     }
     //price
     if (price) {
-      obj.price = price
+      findProduct.price = price
     }
     //currencyId
     if (currencyId) {
-      obj.currencyId = currencyId
+      findProduct.currencyId = currencyId
     }
     //currencyFormat
     if (currencyFormat) {
       return res.status(400).send({ status: false, msg: "The  currencyFormat is not valid" });
-      obj.currencyFormat = currencyFormat
+      findProduct.currencyFormat = currencyFormat
     }
     //productImage
     let files = req.files;
-    if (files) {
-      obj.productImage = await uploadFile.uploadFile(files[0]);
+    if (files.length>0) {
+      findProduct.productImage = await uploadFile.uploadFile(files[0]);
     }
 
     //availableSizes
+
     if (availableSizes) {
       let s = ["S", "XS", "M", "X", "L", "XXL", "XL"];
       const availSizes = availableSizes.split(",").map((s) => s.trim().toUpperCase());
@@ -196,13 +197,14 @@ const updateProduct = async function (req, res) {
       for (let i = 0; i < availSizes.length; i++) {
         if (!s.includes(availSizes[i]))
           return res.status(400).send({ status: false, msg: "provide only S, XS, M, X, L, XXL, XL" });
+          if(findProduct.availableSizes.includes(availSizes[i]))
+          return res.status(400).send({ status: false, msg: "size already exists" });
+          findProduct.availableSizes.push(availSizes[i])
       }
-      obj.availableSizes = availSizes
+      
     }
 
-   const  updateProduct = await productModel.findByIdAndUpdate({ productId, isDeleted: false }, { $set: obj }, { new: true })
-    if (!updateProduct)
-      return res.status(404).send({ status: false, messege: "no data found" });
+    const updateProduct = await  findProduct.save()
     return res.status(200).send({ status: true, message: "Success", data: updateProduct });
 
   } catch (error) {

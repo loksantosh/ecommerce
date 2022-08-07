@@ -3,7 +3,7 @@ const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const orderModel = require('../models/orderModel')
 
-// 13. API ==================================== CREATE ORDER BY USER ID ==========================================================
+// 14. API ==================================== CREATE ORDER BY USER ID ==========================================================
 
 
 const createOrder = async function (req, res) {
@@ -64,7 +64,7 @@ const createOrder = async function (req, res) {
         }
 
         const createOrder = await orderModel.create(order)
-
+        await createOrder.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
 
         findCart.items = []
         findCart.totalPrice = 0
@@ -81,7 +81,7 @@ const createOrder = async function (req, res) {
 }
 
 
-// 14. API ==================================== UPDATE ORDER BY USER ID ==========================================================
+// 15. API ==================================== UPDATE ORDER BY USER ID ==========================================================
 
 const updateOrder = async function (req, res) {
     let data = req.body
@@ -100,6 +100,10 @@ const updateOrder = async function (req, res) {
     if (!findUserId)
         return res.status(404).send({ status: false, messege: "user doesn't exist" });
 
+        // const findCart=await cartModel.findOne({userId:userId})
+        // if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
+        
+
     const { orderId } = data
 
     const findOrder = await orderModel.findById(orderId)
@@ -110,10 +114,11 @@ const updateOrder = async function (req, res) {
         return res.status(403).send({ status: false, msg: "order cannot be cancelled" })
     }
 
+
     else {
         findOrder.status = "cancelled"
         const updateOrder = await findOrder.save()
-
+        await updateOrder.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
         return res.status(200).send({ status: true, message: 'Success', data: updateOrder })
     }
 }

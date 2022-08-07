@@ -8,8 +8,7 @@ app.use(multer().any())
 app.use(express.json());
 
 mongoose
-  .connect(
-    "mongodb+srv://santosh:Santosh24@cluster0.xy0vu.mongodb.net/groupDatabase66?retryWrites=true&w=majority",
+  .connect("mongodb+srv://santosh:Santosh24@cluster0.xy0vu.mongodb.net/groupDatabase66?retryWrites=true&w=majority",
     { useNewUrlParser: true }
   ).then(() => { console.log("Database connected"), (error) => console.log(error); });
 

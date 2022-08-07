@@ -3,7 +3,7 @@ const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const productModel = require('../models/productModel')
 
-// 9. API ==================================== CREATE CART BY USER ID ==========================================================
+// 10. API ==================================== CREATE CART BY USER ID ==========================================================
 
 const createCart = async function (req, res) {
     try {
@@ -72,7 +72,7 @@ const createCart = async function (req, res) {
                     findCart.totalPrice = Product.price + findCart.totalPrice
                     const sameProduct = await findCart.save()
                     await sameProduct.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
-                    return res.json(sameProduct)
+                    return res.send(sameProduct)
                 }
             }
 
@@ -85,12 +85,12 @@ const createCart = async function (req, res) {
         }
     }
     catch (error) {
-        return res.status(500).json({ status: 500, msg: error.message })
+        return res.status(500).send({ status: 500, msg: error.message })
     }
 }
 
 
-// 10. API ==================================== UPDATE CART BY USER ID ==========================================================
+// 11. API ==================================== UPDATE CART BY USER ID ==========================================================
 
 const updateCart = async function (req, res) {
     try {
@@ -145,10 +145,10 @@ const updateCart = async function (req, res) {
                     findCart.totalPrice -= (Product.price * a)
                     findCart.totalItems -= 1
                     const sameProduct = await findCart.save()
-                    return res.json(sameProduct)
+                    return res.send(sameProduct)
                 }
             }
-            return res.status(404).json({ status: false, msg: "product doesn't exist" })
+            return res.status(404).send({ status: false, msg: "product doesn't exist" })
 
         }
 
@@ -169,17 +169,17 @@ const updateCart = async function (req, res) {
                         findCart.totalItems -= 1
                     }
                     const sameProduct = await findCart.save()
-                    return res.json(sameProduct)
+                    return res.send(sameProduct)
                 }
             }
-            return res.status(404).json({ status: false, msg: "product doesn't exist" })
+            return res.status(404).send({ status: false, msg: "product doesn't exist" })
         }
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
     }
 }
 
-// 11. API ==================================== GET CART BY USER ID ==========================================================
+// 12. API ==================================== GET CART BY USER ID ==========================================================
 
 
 const getCart = async function (req, res) {
@@ -194,7 +194,7 @@ const getCart = async function (req, res) {
         const findCart = await cartModel.findOne({ userId: userId })
         if (!findCart)
             return res.status(404).send({ status: false, messege: `No cart found with this UserId ${userId}` });
-
+            await findCart.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
         return res.status(200).send({ status: true, message: "cart details", data: findCart });
 
     } catch (err) {
@@ -203,7 +203,7 @@ const getCart = async function (req, res) {
 };
 
 
-// 12. API ==================================== DELETE CART BY USER ID ==========================================================
+// 13. API ==================================== DELETE CART BY USER ID ==========================================================
 
 
 
@@ -217,8 +217,18 @@ const deleteCart = async function (req, res) {
 
         if (!userId) return res.status(400).send({ status: false, messege: "userId is required" })
 
-        const deleteCart = await cartModel.findOneAndUpdate((userId), { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
-        if (!deleteCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
+        const findCart=await cartModel.findOne({userId:userId})
+        if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
+        
+        if(findCart.items.length==0)
+        return res.status(409).send({ status:false,messege: "cart already deleted" })
+       
+        findCart.items=[]
+        findCart.totalPrice=0
+        findCart.totalItems=0
+
+          const deleteCart= await findCart.save()
+
         return res.status(200).send({ messege: "cart deleted", data: deleteCart })
     }
     catch (err) {

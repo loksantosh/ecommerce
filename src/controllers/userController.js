@@ -60,7 +60,7 @@ const createUser = async function (req, res) {
     if (typeof phone !== "string")
       return res.status(400).send({ status: false, msg: " Please enter  phone as a String" });
 
-    if (!/^(\+\d{1,3}[- ]?)?\d{10}$/.test(phone))
+    if (!/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(phone))
       return res.status(400).send({
         status: false, msg: "Please enter a valid Indian phone number",
       });
@@ -81,7 +81,7 @@ const createUser = async function (req, res) {
       )
     )
       return res.status(400).send({ status: false, msg: "password must be 8-15 charecter long with a number special charecter and should have both upper and lowercase alphabet", });
-
+    // password-encrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPass = await bcrypt.hash(password, salt);
     req.body.password = hashedPass;
@@ -252,19 +252,19 @@ const updateUser = async (req, res) => {
     let { fname, lname, email, phone, password, profileimage, address } = data;
 
     let obj = {};
-
+    // fname
     if (fname) {
       if (!/^\w[a-zA-Z.\s_]*$/.test(fname))
         return res.status(400).send({ status: false, msg: "The  fname may contain only letters" });
       obj.fname = fname;
     }
-
+    // lname
     if (lname) {
       if (!/^\w[a-zA-Z.\s_]*$/.test(lname))
         return res.status(400).send({ status: false, msg: "The  fname may contain only letters" });
       obj.lname = lname;
     }
-
+    // email
     if (email) {
       let checkEmail = validator.validate(email);
       if (!checkEmail) {
@@ -276,13 +276,13 @@ const updateUser = async (req, res) => {
       }
       obj.email = email;
     }
-
+    // phone
     if (phone) {
       if (typeof phone !== "string")
         return res.status(400).send({ status: false, msg: " Please enter  phone as a String" });
 
       if (!/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone))
-        return res.status(400).send({status: false, msg: "Please enter a valid Indian phone number",});
+        return res.status(400).send({ status: false, msg: "Please enter a valid Indian phone number", });
 
       let uniquephone = await userModel.findOne({ phone: phone });
       if (uniquephone) {
@@ -290,7 +290,7 @@ const updateUser = async (req, res) => {
       }
       obj.phone = phone;
     }
-
+    // password
     if (password) {
       if (
         !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/.test(
@@ -307,7 +307,7 @@ const updateUser = async (req, res) => {
       const hashedPass = await bcrypt.hash(password, salt);
       obj.password = hashedPass;
     }
-
+    // productImage
     let files = req.files;
     if (files.length > 0) {
       if (!files) {
