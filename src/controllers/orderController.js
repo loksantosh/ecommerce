@@ -108,11 +108,10 @@ const updateOrder = async function (req, res) {
     if (!findUserId)
         return res.status(404).send({ status: false, messege: "user doesn't exist" });
 
-    // const findCart=await cartModel.findOne({userId:userId})
-    // if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
+   
 
 
-    const { orderId } = data
+    const { orderId , status } = data
 
     const findOrder = await orderModel.findById(orderId)
     if (!findOrder)
@@ -124,7 +123,13 @@ const updateOrder = async function (req, res) {
 
 
     else {
-        findOrder.status = "cancelled"
+        let check=['pending','cancelled','completed']
+        if(!check.includes(status))
+        return res.status(400).send({ status: false, msg: `order status can only be ${check}`})
+
+        findOrder.status =status
+        
+
         const updateOrder = await findOrder.save()
         await updateOrder.populate('items.productId', { _id: 1, title: 1, price: 1, productImage: 1 })
         return res.status(200).send({ status: true, message: 'Success', data: updateOrder })

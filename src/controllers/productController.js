@@ -47,6 +47,13 @@ const createProduct = async function (req, res) {
     return res.status(400).send({ status: false, msg: "Please enter productImage" });
   }
 
+  if (!/image\/png|image\/jpeg|image\/jpg/.test(files[0].mimetype)) {
+    return res.status(400).send({
+      status: false,
+      message: "Only images can be uploaded (jpeg/jpg/png)",
+    });
+  }
+
   req.body.productImage = await uploadFile.uploadFile(files[0]);
 
   //availableSizes
@@ -70,9 +77,10 @@ const getProducts = async function (req, res) {
   try {
     let data = req.query;
 
-    if(data){
-      const {priceGreaterThan,priceLessThan,priceSort}=data
-    }
+   
+      const{priceGreaterThan,priceLessThan,priceSort}=data
+      
+    
     if(!priceSort){
      priceSort=0
      }
@@ -189,6 +197,13 @@ const updateProduct = async function (req, res) {
     //productImage
     let files = req.files;
     if (files.length>0) {
+      
+      if (!/image\/png|image\/jpeg|image\/jpg/.test(files[0].mimetype)) {
+        return res.status(400).send({
+          status: false,
+          message: "Only images can be uploaded (jpeg/jpg/png)",
+        });
+      }
       findProduct.productImage = await uploadFile.uploadFile(files[0]);
     }
 

@@ -303,7 +303,7 @@ const updateUser = async (req, res) => {
           password
         )
       )
-        return res.status(400).send({ status: false, msg: "password must be 8-15 charecter long with a number special charecter and should have both upper and lowercase alphabet", });
+        return res.status(400).send({ status: false, msg: "password must be 8-15 character ", });
 
       let validPassword = await bcrypt.compare(password, user.password);
       if (validPassword)
