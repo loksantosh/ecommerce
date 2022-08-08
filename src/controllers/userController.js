@@ -239,6 +239,12 @@ const updateUser = async (req, res) => {
     if (!userId)
       return res.status(400).send({ status: false, messege: "userId is required" });
 
+      //authorization
+      let validUserId = req.decodedToken.userId
+      if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
+
     const user = await userModel.findById(userId);
     if (!user)
       return res.status(404).send({ status: false, messege: "no data found " });

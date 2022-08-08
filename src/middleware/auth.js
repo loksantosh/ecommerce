@@ -31,41 +31,11 @@ const authentication = async function (req, res, next) {
     }
 }
 
-//========================================= AUTHORIZATION ==============================================================
 
 
-const authorization = async function (req, res, next) {
-    try {
-        let validUserId = req.decodedToken.userId
-        let id = req.params.userId
-
-
-        if (id.length != 24) {
-            return res.status(400).send({ status: false, msg: " Please enter proper length of user Id" })
-        }
-
-        let checkUser = await userModel.findById(id)
-
-
-        if (!checkUser) {
-            return res.status(404).send({ status: false, msg: "no such user exists" })
-        }
-
-        if (checkUser._id != validUserId) {
-            return res.status(403).send({ status: false, msg: "User is not authorized" })
-        }
-
-        next()
-
-    } catch (err) {
-        return res.status(500).send({ status: false, msg: err.message })
-    }
-}
+module.exports = { authentication}
 
 
 
 
 
-
-
-module.exports = { authentication, authorization }

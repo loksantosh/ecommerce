@@ -21,7 +21,11 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId", });
         }
 
-
+        //authorization
+        let validUserId = req.decodedToken.userId
+        if (userId != validUserId) {
+            return res.status(403).send({ status: false, msg: "User is not authorized" })
+        }
         const findUserId = await userModel.findById(userId);
         if (!findUserId)
             return res.status(404).send({ status: false, messege: "user doesn't exist" });
@@ -64,7 +68,7 @@ const createOrder = async function (req, res) {
         }
 
         const createOrder = await orderModel.create(order)
-        await createOrder.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
+        await createOrder.populate('items.productId', { _id: 1, title: 1, price: 1, productImage: 1 })
 
         findCart.items = []
         findCart.totalPrice = 0
@@ -95,14 +99,18 @@ const updateOrder = async function (req, res) {
         return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId", });
     }
 
-
+    //authorization
+    let validUserId = req.decodedToken.userId
+    if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
     const findUserId = await userModel.findById(userId);
     if (!findUserId)
         return res.status(404).send({ status: false, messege: "user doesn't exist" });
 
-        // const findCart=await cartModel.findOne({userId:userId})
-        // if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
-        
+    // const findCart=await cartModel.findOne({userId:userId})
+    // if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
+
 
     const { orderId } = data
 
@@ -118,7 +126,7 @@ const updateOrder = async function (req, res) {
     else {
         findOrder.status = "cancelled"
         const updateOrder = await findOrder.save()
-        await updateOrder.populate('items.productId',{_id:1 ,title:1,price:1,productImage:1})
+        await updateOrder.populate('items.productId', { _id: 1, title: 1, price: 1, productImage: 1 })
         return res.status(200).send({ status: true, message: 'Success', data: updateOrder })
     }
 }

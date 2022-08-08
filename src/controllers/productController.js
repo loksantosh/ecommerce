@@ -69,12 +69,16 @@ const createProduct = async function (req, res) {
 const getProducts = async function (req, res) {
   try {
     let data = req.query;
-    let priceGreaterThan = req.query.priceGreaterThan;
-    let priceLessThan = req.query.priceLessThan;
 
+    if(data){
+      const {priceGreaterThan,priceLessThan,priceSort}=data
+    }
+    if(!priceSort){
+     priceSort=0
+     }
     if (data) {
       if (priceGreaterThan && priceLessThan) {
-        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan, $lt: priceLessThan } });
+        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan, $lt: priceLessThan } }).sort({price:priceSort})
 
         if (filter.length == 0)
           return res.status(404).send({ status: false, messege: "no products found" });
@@ -82,14 +86,14 @@ const getProducts = async function (req, res) {
       }
 
       if (priceGreaterThan) {
-        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan } });
+        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $gt: priceGreaterThan } }).sort({price:priceSort})
         if (filter.length == 0)
           return res.status(404).send({ status: false, messege: "no products found" });
         return res.status(200).send({ status: true, messege: "products list", data: filter });
       }
 
       if (priceLessThan) {
-        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $lt: priceLessThan } });
+        const filter = await productModel.find({ $and: [data, { isDeleted: false }], price: { $lt: priceLessThan } }).sort({price:priceSort})
         if (filter.length == 0)
           return res.status(404).send({ status: false, messege: "no products found" });
 
@@ -99,14 +103,14 @@ const getProducts = async function (req, res) {
       if (data.availableSizes)
         data.availableSizes = data.availableSizes.split(",").map((s) => s.trim().toUpperCase());
 
-      const productDetails = await productModel.find({ $and: [data, { isDeleted: false }] }).sort({ price: 1 });
+      const productDetails = await productModel.find({ $and: [data, { isDeleted: false }] }).sort({price:priceSort})
 
       if (productDetails.length == 0)
         return res.status(404).send({ status: false, messege: "No product found" });
 
       return res.status(200).send({ status: true, messege: "Products list", data: productDetails });
     } else {
-      const productDetails = await productModel.find({ isDeleted: false }).sort({ price: 1 });
+      const productDetails = await productModel.find({ isDeleted: false }).sort({price:priceSort})
       return res.status(200).send({ status: true, messege: "Products list", data: productDetails });
     }
   } catch (err) {

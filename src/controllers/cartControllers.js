@@ -20,6 +20,11 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId", });
         }
 
+        //authorization
+      let validUserId = req.decodedToken.userId
+      if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
 
         const findUserId = await userModel.findById(userId);
         if (!findUserId)
@@ -35,17 +40,7 @@ const createCart = async function (req, res) {
             return res.status(404).send({ status: false, messege: "Product doesn't exist" });
 
 
-        if (cartId) {
-            if (!mongoose.isValidObjectId(cartId)) {
-                return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId", });
-            }
-
-            const cart = await cartModel.findById(cartId)
-            if (!cart)
-                return res.status(404).send({ status: false, messege: "cart doesn't exist" });
-
-        }
-
+       
 
         const findCart = await cartModel.findOne({ userId: userId })
 
@@ -109,6 +104,12 @@ const updateCart = async function (req, res) {
 
         if (!userId)
             return res.status(400).send({ status: false, messege: "userId is required" });
+
+            //authorization
+      let validUserId = req.decodedToken.userId
+      if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
 
         const findUserId = await userModel.findById(userId);
         if (!findUserId)
@@ -191,6 +192,12 @@ const getCart = async function (req, res) {
                 return res.status(400).send({ status: false, messege: "Please enter userId as a valid ObjectId" });
             }
         }
+
+        //authorization
+      let validUserId = req.decodedToken.userId
+      if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
         const findCart = await cartModel.findOne({ userId: userId })
         if (!findCart)
             return res.status(404).send({ status: false, messege: `No cart found with this UserId ${userId}` });
@@ -217,6 +224,12 @@ const deleteCart = async function (req, res) {
 
         if (!userId) return res.status(400).send({ status: false, messege: "userId is required" })
 
+        //authorization
+      let validUserId = req.decodedToken.userId
+      if (userId != validUserId) {
+        return res.status(403).send({ status: false, msg: "User is not authorized" })
+    }
+
         const findCart=await cartModel.findOne({userId:userId})
         if (!findCart) return res.status(404).send({ status: false, messege: `no Cart found with this userId ${userId}` })
         
@@ -229,7 +242,7 @@ const deleteCart = async function (req, res) {
 
           const deleteCart= await findCart.save()
 
-        return res.status(200).send({ messege: "cart deleted", data: deleteCart })
+        return res.status(204).send()
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })
