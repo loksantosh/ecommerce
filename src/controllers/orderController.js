@@ -12,6 +12,8 @@ const createOrder = async function (req, res) {
 
         let data = req.body
 
+        let cancellable = data.cancellable
+
         if (Object.keys(data).length == 0)
             return res.status(400).send({ status: false, msg: "Please enter valid data", });
 
@@ -49,7 +51,8 @@ const createOrder = async function (req, res) {
         order.items = findCart.items
         order.totalPrice = findCart.totalPrice
         order.totalItems = findCart.totalItems
-
+        order.cancellable = data.cancellable
+        
 
         let count = 0
         for (let i = 0; i < findCart.items.length; i++) {
@@ -67,6 +70,12 @@ const createOrder = async function (req, res) {
             order.status = status
         }
 
+        if(cancellable){
+            if(typeof cancellable != Boolean)
+            return res.status(400).send({ status: false, msg: "cancellable should be Boolean" })
+
+
+        }
         const createOrder = await orderModel.create(order)
         await createOrder.populate('items.productId', { _id: 1, title: 1, price: 1, productImage: 1 })
 
@@ -118,7 +127,7 @@ const updateOrder = async function (req, res) {
         return res.status(404).send({ status: false, messege: "order doesn't exist" });
 
     if (findOrder.cancellable === false) {
-        return res.status(403).send({ status: false, msg: "order cannot be cancelled" })
+        return res.status(403).send({ status: false, msg: "order status can not be changed" })
     }
 
 

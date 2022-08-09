@@ -38,7 +38,7 @@ const orderSchema = new mongoose.Schema(
 
     cancellable: {
       type: Boolean,
-      default: "true"
+      default: true
     },
 
     status: {

@@ -47,6 +47,14 @@ const createUser = async function (req, res) {
     //profileimage
     let files = req.files;
 
+    if (!/image\/png|image\/jpeg|image\/jpg/.test(files[0].mimetype)) {
+      return res.status(400).send({
+        status: false,
+        message: "Only images can be uploaded (jpeg/jpg/png)",
+      });
+    }
+  
+
     if (files == 0)
       return res.status(400).send({ status: false, msg: "Please enter profileimage" });
 
@@ -192,7 +200,7 @@ const loginUser = async function (req, res) {
         organisation: "functionUp",
       },
       "Group66",
-      { expiresIn: "3600s" }
+      { expiresIn: "2H" }
     );
 
     let id = user._id;
@@ -250,8 +258,9 @@ const updateUser = async (req, res) => {
       return res.status(404).send({ status: false, messege: "no data found " });
 
     const data = req.body;
-
-    if (Object.keys(data).length == 0) {
+    
+    let files = req.files;
+    if (Object.keys(data).length == 0 && !files) {
       return res.status(400).send({ status: false, msg: "Please enter request data to be created" });
     }
 
@@ -314,8 +323,15 @@ const updateUser = async (req, res) => {
       obj.password = hashedPass;
     }
     // productImage
-    let files = req.files;
+    
+  
     if (files.length > 0) {
+      if (!/image\/png|image\/jpeg|image\/jpg/.test(files[0].mimetype)) {
+        return res.status(400).send({
+          status: false,
+          message: "Only images can be uploaded (jpeg/jpg/png)",
+        });
+      }
       if (!files) {
         return res.status(400).send({ status: false, msg: "Please enter profileimage" });
       }
