@@ -196,12 +196,15 @@ const updateProduct = async function (req, res) {
     }
     //currencyId
     if (currencyId) {
+      if(currencyId!='INR')
+      return res.status(400).send({ status: false, msg: "The  currencyId is not valid" });
       findProduct.currencyId = currencyId
     }
     //currencyFormat
     if (currencyFormat) {
-      return res.status(400).send({ status: false, msg: "The  currencyFormat is not valid" });
-      findProduct.currencyFormat = currencyFormat
+      if (!/^₹$/.test(currencyFormat))
+    return res.status(400).send({ status: false, msg: "The  currencyFormat is not valid" });
+    findProduct.currencyFormat = currencyFormat
     }
     //productImage
     let files = req.files;
