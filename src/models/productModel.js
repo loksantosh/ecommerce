@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema({
     isFreeShipping: {
         type: Boolean,
         default: false,
-        trim: true
+
     },
     productImage: {
         type: String,
@@ -47,7 +47,7 @@ const productSchema = new mongoose.Schema({
     },
     installments: {
         type: Number,
-        trim: true
+
     },
     deletedAt: {
         type: Date
