@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 const app = express();
 
 const multer = require("multer");
-const Port = process.env.PORT;
 app.use(multer().any());
 
 app.use(express.json());
@@ -16,6 +15,6 @@ mongoose.connect(process.env.DATA_BASE, { useNewUrlParser: true }).then(() => {
 
 app.use("/", route);
 
-app.listen(Port, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("Server running on Port " + Port);
 });
